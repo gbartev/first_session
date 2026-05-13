@@ -1,0 +1,607 @@
+/* ════════════════════════════════════════
+   EASING VARIABLES
+════════════════════════════════════════ */
+:root {
+  --ease-out-quart:    cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+/* ════════════════════════════════════════
+   СТРАНИЦА
+════════════════════════════════════════ */
+.page {
+  width: 1440px;
+  padding: 40px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  overflow: hidden;
+  /* фиксирует дочерние элементы, чтобы slide-out не создавал скролл */
+  position: relative;
+}
+
+/* ════════════════════════════════════════
+   ЛЕВАЯ ПАНЕЛЬ
+════════════════════════════════════════ */
+.leftPanel {
+  width: 544px;
+  height: 820px;
+  background: #7f42e1;
+  border-radius: 40px;
+  /* overflow: hidden убрано — ломает preserve-3d на вложенных 3D-элементах */
+  clip-path: inset(0 0 0 0 round 40px);
+  position: relative;
+  flex-shrink: 0;
+  will-change: width;
+  transition: width 0.5s var(--ease-in-out-quart);
+}
+.leftPanel.expanded {
+  width: 1360px;
+}
+
+.backBtn {
+  position: absolute;
+  top: 30px;
+  left: 30px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+.backBtn img { width: 40px; height: 40px; display: block; }
+
+.leftHeader {
+  position: absolute;
+  top: 100px;
+  left: 30px;
+  width: 484px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #fff;
+  will-change: opacity;
+  /* появление — 0.5s, как у панели */
+  transition: opacity 0.5s var(--ease-in-out-quart);
+}
+.leftHeader.hidden {
+  opacity: 0;
+  pointer-events: none;
+  /* исчезновение — быстро */
+  transition: opacity 0.2s var(--ease-out-quart);
+}
+
+.leftTitle {
+  font-size: 42px;
+  line-height: 48px;
+  font-weight: 600;
+}
+.leftTitleScript {
+  display: block;
+  font-family: var(--font-script);
+  font-size: 46px;
+  line-height: 48px;
+  font-weight: 400;
+}
+.leftSubtitle {
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 400;
+  width: 320px;
+}
+
+/* ════════════════════════════════════════
+   КАРТА — ЯКОРЬ И АНИМАЦИЯ
+════════════════════════════════════════ */
+
+/* Якорь: нулевой размер, позиционирован в центре карты.
+   Использует transform вместо top/left — только GPU, без layout reflow. */
+.cardAnchor {
+  position: absolute;
+  top: 570px;
+  left: 272px;
+  width: 0;
+  height: 0;
+  will-change: transform;
+  transition: transform 0.45s var(--ease-in-out-quart);
+}
+.cardAnchor.centered {
+  /* delta: left 680-272=408, top 414-570=-156 */
+  transform: translate(408px, -156px);
+}
+
+/* Ориентация: 464×296 (ландшафт), изначально повёрнута в портрет через -90°.
+   translate(-50%,-50%) центрирует относительно якоря. */
+.cardOrient {
+  width: 464px;
+  height: 296px;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  perspective: 1000px;
+  will-change: transform;
+  transition: transform 0.45s var(--ease-in-out-quart);
+}
+.cardOrient.horizontal {
+  transform: translate(-50%, -50%) rotate(0deg);
+}
+
+/* 3D-флип контейнер */
+.cardFlip3D {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.5s var(--ease-in-out-cubic);
+}
+.cardFlip3D.flipped {
+  transform: rotateY(180deg);
+}
+
+/* Стороны карты */
+.cardFront,
+.cardBack {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 22px;
+  overflow: hidden;
+}
+.cardFront {
+  transform: translateZ(0);
+}
+.cardFront img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Обратная сторона: форма активации */
+.cardBack {
+  transform: rotateY(180deg) translateZ(0);
+  background: #ebe7f4;
+}
+.cardMagneticStripe {
+  position: absolute;
+  left: -1px;
+  top: 19px;
+  width: 466px;
+  height: 48px;
+}
+.cardMagneticStripe img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.cardFormRow {
+  position: absolute;
+  left: 29px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.cardFormRow:nth-child(2) { top: 103px; }
+.cardFormRow:nth-child(3) { top: 181px; }
+.cardFormLabel {
+  font-family: var(--font-main);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 30px;
+  color: #191919;
+  white-space: nowrap;
+}
+.cardInput {
+  background: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: var(--font-main);
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 30px;
+  color: #191919;
+  outline: none;
+}
+.cardInput::placeholder { color: #949494; }
+.cardInput.input4  { width: 99px; }
+.cardInput.input7  { width: 148px; }
+
+/* Оверлей активации: заголовок + чекбокс + кнопка (фаза 4) */
+.activationOverlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s var(--ease-out-quart);
+}
+.activationOverlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Заголовок: выровнен по карте (left: 448px, width: 464px) */
+.activationHeader {
+  position: absolute;
+  top: 60px;
+  left: 448px;
+  width: 464px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #fff;
+  text-align: center;
+}
+.activationHeaderTitle {
+  font-size: 42px;
+  line-height: 48px;
+  font-weight: 600;
+}
+.activationHeaderScript {
+  display: block;
+  font-family: var(--font-script);
+  font-size: 46px;
+  line-height: 48px;
+  font-weight: 400;
+}
+.activationHeaderSub {
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 400;
+}
+
+/* Чекбокс: под картой, выровнен по ней */
+.activationCheckbox {
+  position: absolute;
+  top: 582px;
+  left: 448px;
+  width: 464px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+.activationCheckboxText {
+  flex: 1;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 0.16px;
+}
+.activationCheckboxLink {
+  color: #cabef3;
+  font-weight: 500;
+}
+.activationCheckboxBtn {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.activationCheckboxBtn img { width: 100%; height: 100%; display: block; }
+
+/* Кнопка: по центру панели, шире карты */
+.activationSubmitBtn {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 464px;
+  background: #fff;
+  border-radius: 10px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #191919;
+  cursor: pointer;
+  white-space: nowrap;
+  border: none;
+}
+
+/* ════════════════════════════════════════
+   ОВЕРЛЕИ КАРТЫ (внутри cardFront, ландшафтные координаты)
+════════════════════════════════════════ */
+.cardOverlayFlat {
+  position: absolute;
+}
+.cardOverlayFlat img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Footer */
+.leftFooter {
+  position: absolute;
+  top: 670px;
+  left: 0;
+  width: 544px;
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: linear-gradient(to top, #7f42e1 52.4%, rgba(127,66,225,0) 100%);
+  transition: opacity 0.35s var(--ease-out-quart);
+}
+.leftFooter.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s var(--ease-out-quart);
+}
+
+.btnPrimary {
+  background: #fff;
+  border-radius: 10px;
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #191919;
+  cursor: pointer;
+}
+.btnGhost {
+  background: transparent;
+  border-radius: 10px;
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* ════════════════════════════════════════
+   ПРАВАЯ ПАНЕЛЬ
+════════════════════════════════════════ */
+.rightPanel {
+  /* фиксированная ширина: 1360px (контент) - 544px (панель) - 20px (gap) */
+  width: 796px;
+  flex-shrink: 0;
+  height: 820px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow: hidden;
+  will-change: transform, opacity;
+  /* easing для входа (возврат): transform начинает сразу, opacity чуть позже */
+  transition: transform 0.5s var(--ease-out-quart),
+              opacity 0.6s 0.1s var(--ease-out-quart);
+}
+.rightPanel.exiting {
+  transform: translateX(40px);
+  opacity: 0;
+  pointer-events: none;
+  /* easing для выхода: ease-in-out — элемент разгоняется и улетает */
+  transition: transform 0.5s var(--ease-in-out-quart),
+              opacity 0.3s var(--ease-out-quart);
+}
+
+.cashbackCard {
+  flex: 1;
+  min-height: 0;
+  background: #262626;
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+}
+.decoCircle {
+  position: absolute;
+  width: 125px;
+  height: 125px;
+  border-radius: 30px;
+  background: rgba(31,31,31,0.04);
+}
+.cashbackHeader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 367px;
+  padding: 40px 20px 10px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.cashbackTitle {
+  font-size: 42px;
+  line-height: 48px;
+  font-weight: 600;
+  color: #fff;
+}
+.cashbackTitleScript {
+  font-family: var(--font-script);
+  font-size: 46px;
+  line-height: 48px;
+  font-weight: 400;
+}
+.cashbackSubtitle {
+  font-size: 18px;
+  line-height: 22px;
+  font-weight: 400;
+  color: #fff;
+}
+
+/* Логотипы */
+.logosOuter {
+  position: absolute;
+  top: -94.16px;
+  left: calc(50% + 168.5px);
+  transform: translateX(-50%);
+  display: flex;
+  gap: 19.56px;
+  align-items: flex-start;
+  padding-top: 21.733px;
+}
+.logoCol { display: flex; flex-direction: column; gap: 19.348px; will-change: transform; }
+
+@keyframes animDown {
+  from { transform: translateY(-557.232px); }
+  to   { transform: translateY(0); }
+}
+@keyframes animUp {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-557.232px); }
+}
+.logoCol.animDown { animation: animDown 16s linear infinite; }
+.logoCol.animUp   { animation: animUp 16s linear infinite; }
+.logoItem {
+  width: 119.96px;
+  height: 119.96px;
+  border-radius: 30.957px;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+.logoInner { position: absolute; }
+.logoInner img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  display: block;
+  object-fit: contain;
+}
+
+.moreLink {
+  position: absolute;
+  top: 340px;
+  left: 30px;
+  padding-bottom: 36px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+.moreLinkText {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+.moreLinkIcon { width: 20px; height: 20px; position: relative; flex-shrink: 0; }
+.moreLinkIcon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+
+/* Нижний ряд */
+.bottomRow { flex-shrink: 0; height: 400px; display: flex; gap: 20px; }
+.bottomCard {
+  flex: 1;
+  min-width: 0;
+  height: 400px;
+  border-radius: 40px;
+  overflow: hidden;
+  position: relative;
+}
+.cardTextFooter {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0 30px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #fff;
+}
+.cardFooterTitle { font-size: 30px; line-height: 36px; font-weight: 600; }
+.cardFooterDesc { font-size: 18px; line-height: 22px; font-weight: 400; }
+
+/* Бирюзовая карточка */
+.personalCard { background: #008693; }
+.sneakerClip {
+  position: absolute;
+  top: 0;
+  left: 27px;
+  width: 335px;
+  height: 210px;
+  overflow: hidden;
+}
+.swosh1 {
+  position: absolute;
+  top: 114.68px; left: 36.41px; right: 75.11px; bottom: 20.1px;
+  display: flex; align-items: center; justify-content: center;
+}
+.swosh1 img { transform: scaleX(-1) rotate(2.88deg); width: 100%; height: 100%; object-fit: contain; }
+.swosh2 { position: absolute; top: 35.55px; left: 183.88px; right: 62.95px; bottom: 92.38px; }
+.swosh2 img { position: absolute; inset: -1.02% 0 0 0; width: 100%; height: 100%; object-fit: contain; }
+.sneakerWrap {
+  position: absolute;
+  left: 52.34px;
+  top: -25px;
+  width: 245.649px;
+  height: 236.767px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sneakerWrap img {
+  width: 209.181px;
+  height: 197.657px;
+  object-fit: contain;
+  transform: scaleY(-1) rotate(168.02deg);
+  flex-shrink: 0;
+}
+
+/* Фото-карточка */
+.settingsPhoto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 60% top; }
+.photoOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180.022deg,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0.08) 24.35%,
+    rgba(0,0,0,0.36) 48.69%,
+    rgba(0,0,0,0.68) 72.72%,
+    rgb(0,0,0) 97.35%
+  );
+}
+.avatarIcon {
+  position: absolute;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatarIcon img { width: 55%; height: 55%; object-fit: contain; }
+
+/* ════════════════════════════════════════
+   ДОСТУПНОСТЬ
+════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .rightPanel,
+  .leftPanel,
+  .leftHeader,
+  .leftFooter,
+  .cardAnchor,
+  .cardOrient,
+  .cardFlip3D,
+  .cardOverlay,
+  .activationOverlay {
+    transition: none;
+    animation: none;
+  }
+}
