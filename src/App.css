@@ -2,6 +2,7 @@
    EASING VARIABLES
 ════════════════════════════════════════ */
 :root {
+  --ease-out-cubic:    cubic-bezier(0.215, 0.61, 0.355, 1);
   --ease-out-quart:    cubic-bezier(0.165, 0.84, 0.44, 1);
   --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-in-out-cubic: cubic-bezier(0.645, 0.045, 0.355, 1);
@@ -337,12 +338,16 @@
   flex-direction: column;
   gap: 10px;
   background: linear-gradient(to top, #7f42e1 52.4%, rgba(127,66,225,0) 100%);
-  transition: opacity 0.35s var(--ease-out-quart);
+  will-change: opacity, transform;
+  transition: opacity 0.4s var(--ease-out-cubic),
+              transform 0.5s var(--ease-out-cubic);
 }
 .leftFooter.hidden {
   opacity: 0;
+  transform: translateY(80px);
   pointer-events: none;
-  transition: opacity 0.2s var(--ease-out-quart);
+  transition: opacity 0.15s var(--ease-out-cubic),
+              transform 0.3s var(--ease-out-cubic);
 }
 
 .btnPrimary {
