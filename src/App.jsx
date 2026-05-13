@@ -87,8 +87,8 @@ export default function App() {
   function handleActivate() {
     if (phase > 0) return
     setPhase(2)
-    setTimeout(() => setPhase(3), 500)
-    setTimeout(() => setPhase(4), 1000)
+    setTimeout(() => setPhase(3), 600)
+    setTimeout(() => setPhase(4), 1100)
   }
 
   function handleBack() {

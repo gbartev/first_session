@@ -108,11 +108,12 @@
   width: 0;
   height: 0;
   will-change: transform;
-  transition: transform 0.45s var(--ease-in-out-quart);
+  transition: transform 0.5s var(--ease-in-out-cubic);
 }
 .cardAnchor.centered {
   /* delta: left 680-272=408, top 414-570=-156 */
   transform: translate(408px, -156px);
+  transition: transform 0.5s var(--ease-in-out-cubic);
 }
 
 /* Ориентация: 464×296 (ландшафт), изначально повёрнута в портрет через -90°.
@@ -123,10 +124,11 @@
   transform: translate(-50%, -50%) rotate(-90deg);
   perspective: 1000px;
   will-change: transform;
-  transition: transform 0.45s var(--ease-in-out-quart);
+  transition: transform 0.5s var(--ease-in-out-cubic);
 }
 .cardOrient.horizontal {
   transform: translate(-50%, -50%) rotate(0deg);
+  transition: transform 0.5s var(--ease-in-out-cubic);
 }
 
 /* 3D-флип контейнер */
